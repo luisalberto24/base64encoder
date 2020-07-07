@@ -13,7 +13,7 @@ namespace base64
 			size_t size = text.size();
 			size_t count = size;
 			size_t allocate_len = get_base64_encoding_buffer_size(count);
-			std::string dest(allocate_len, '\x0');
+			std::string dest(allocate_len, null_literal);
 			while ((count / 3) > 0)
 			{
 				data = ((text[baseindex] << 16) & 0x00FF0000) |
@@ -61,7 +61,7 @@ namespace base64
 			size_t level = 0;
 			size_t baseindex = 0;
 			uint32_t data = 0;
-			std::string result((count / 4) * 3, '\x0');
+			std::string result((count / 4) * 3, null_literal);
 			size_t cpos = 0;
 			count -= 4;
 			while ((count / 4) > 0)
@@ -84,14 +84,14 @@ namespace base64
 			data |= ((get_base64_decoded_index(text[baseindex + 1]) << 12) & 0x0003F000);
 			result[cpos++] = ((((data & 0x00FF0000) >> 16) & 0xFF) - null_literal);
 			size_t pop_back = 0;
-			if (text[baseindex + 2] != '=')
+			if (text[baseindex + 2] != equal_sign_literal)
 			{
 				data |= ((get_base64_decoded_index(text[baseindex + 2]) << 6) & 0x00000FC0);
 				result[cpos++] = ((((data & 0x0000FF00) >> 8) & 0xFF) - null_literal);
 			}
 			else pop_back++;
 
-			if (text[baseindex + 3] != '=')
+			if (text[baseindex + 3] != equal_sign_literal)
 			{
 				data |= (get_base64_decoded_index(text[baseindex + 3]) & 0x0000003F);
 				result[cpos++] = (((data & 0x000000FF) & 0xFF) - null_literal);
@@ -122,7 +122,7 @@ namespace base64
 		if ((text_length % 4) == 0)
 		{
 			size_t substract = text[text_length - 1] == equal_sign_literal ? 1 : 0;
-			if (text[text_length - 2] == equal_sign_literal)
+			if (substract > 0 && text[text_length - 2] == equal_sign_literal)
 			{
 				substract++;
 			}

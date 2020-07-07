@@ -17,6 +17,12 @@ namespace base64
 	class b64encoder
 	{
 		public:
+			enum enum_container_type
+			{
+				none = 0,
+				text = 1,
+				file = 2
+			};
 			static std::string encode(std::string text);
 			static std::string decode(std::string text);
 		private:
