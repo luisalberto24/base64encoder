@@ -11,8 +11,6 @@ Options are:
 
 -sF: Source file. Following this option should be the file to be read for encoding or decoding from/to base64 format.
 
--dT: Destination text. Informs the application to show the conversion on screen. if not "-dT" or "-dF" is set, then "-dT" is assumed.
-
 -dF: Destination file. Informs the application to save the result into a file that is specified next to this option.
 
 Example (using the executable in the location it has been compiled)
