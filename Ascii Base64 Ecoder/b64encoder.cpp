@@ -30,21 +30,21 @@ namespace base64
 
 			switch (count)
 			{
-			case 1:
-				data = text[size - count];
-				dest[cpos++] = base64_encoding_matrix[(UCHAR_T)((data & 0xFC) >> 2)];
-				dest[cpos++] = base64_encoding_matrix[(UCHAR_T)(data & 0x03) << 4];
-				dest[cpos++] = equal_sign_literal;
-				dest[cpos++] = equal_sign_literal;
-				break;
-			case 2:
-				data = ((text[size - count] << 8) & 0x0000FF00) | (text[(size - count) + 1] & 0x000000FF);
-				dest[cpos++] = base64_encoding_matrix[(UCHAR_T)((data & 0x0000FC00) >> 10)];
-				dest[cpos++] = base64_encoding_matrix[(UCHAR_T)((data & 0x000003F0) >> 4)];
-				data = data & 0x0000000F;
-				dest[cpos++] = data > 0 ? base64_encoding_matrix[(UCHAR_T)(data << 2)] : equal_sign_literal;
-				dest[cpos++] = equal_sign_literal;
-				break;
+				case 1:
+					data = text[size - count];
+					dest[cpos++] = base64_encoding_matrix[(UCHAR_T)((data & 0xFC) >> 2)];
+					dest[cpos++] = base64_encoding_matrix[(UCHAR_T)(data & 0x03) << 4];
+					dest[cpos++] = equal_sign_literal;
+					dest[cpos++] = equal_sign_literal;
+					break;
+				case 2:
+					data = ((text[size - count] << 8) & 0x0000FF00) | (text[(size - count) + 1] & 0x000000FF);
+					dest[cpos++] = base64_encoding_matrix[(UCHAR_T)((data & 0x0000FC00) >> 10)];
+					dest[cpos++] = base64_encoding_matrix[(UCHAR_T)((data & 0x000003F0) >> 4)];
+					data = data & 0x0000000F;
+					dest[cpos++] = data > 0 ? base64_encoding_matrix[(UCHAR_T)(data << 2)] : equal_sign_literal;
+					dest[cpos++] = equal_sign_literal;
+					break;
 			}
 
 			return dest;
