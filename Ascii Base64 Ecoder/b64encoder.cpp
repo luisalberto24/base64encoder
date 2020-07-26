@@ -10,22 +10,23 @@ namespace base64
 			size_t cpos = 0;
 			size_t data = 0;
 			size_t size = text.size();
-			size_t count = size;
-			size_t allocate_len = get_base64_encoding_buffer_size(count);
+			int count = size / 3;
+			size_t allocate_len = get_base64_encoding_buffer_size(size);
 			std::string dest(allocate_len, null_literal);
-			while ((count / 3) > 0)
+			while (count > 0)
 			{
-				data = ((text[baseindex] << 16) & 0x00FF0000) |
-					((text[baseindex + 1] << 8) & 0x0000FF00) |
-					(text[baseindex + 2] & 0x000000FF);
+				data  = ((text[baseindex] << 16) & 0x00FF0000);
+				data |= ((text[baseindex + 1] << 8) & 0x0000FF00);
+				data |= (text[baseindex + 2] & 0x000000FF);
 				dest[cpos++] = base64_encoding_matrix[(UCHAR_T)((data & 0x00FC0000) >> 18)];
 				dest[cpos++] = base64_encoding_matrix[(UCHAR_T)((data & 0x0003F000) >> 12)];
 				dest[cpos++] = base64_encoding_matrix[(UCHAR_T)((data & 0x00000FC0) >> 6)];
 				dest[cpos++] = base64_encoding_matrix[(UCHAR_T)((data & 0x0000003F))];
 				baseindex += 3;
-				count -= 3;
+				count--;
 			}
 
+			count = size % 3;
 			switch (count)
 			{
 				case 1:
@@ -53,27 +54,25 @@ namespace base64
 
 	std::string b64encoder::decode(std::string text)
 	{
-		size_t count = text.length();
+		int count = text.length();
 		if (count > 0 && is_valid_base64_string(text))
 		{
 			size_t baseindex = 0;
 			uint32_t data = 0;
-			std::string result((count / 4) * 3, null_literal);
+			count = (count / 4);
+			std::string result(count * 3, null_literal);
 			size_t cpos = 0;
-			count -= 4;
-			while ((count / 4) > 0)
+			while (count > 1)
 			{
 				data = ((get_base64_decoded_index(text[baseindex]) << 18) & 0x00FC0000);
 				data |= ((get_base64_decoded_index(text[baseindex + 1]) << 12) & 0x0003F000);
 				data |= ((get_base64_decoded_index(text[baseindex + 2]) << 6) & 0x00000FC0);
 				data |= (get_base64_decoded_index(text[baseindex + 3]) & 0x0000003F);
-
 				result[cpos++] = ((((data & 0x00FF0000) >> 16) & 0xFF) - null_literal);
 				result[cpos++] = ((((data & 0x0000FF00) >> 8) & 0xFF) - null_literal);
 				result[cpos++] = (((data & 0x000000FF) & 0xFF) - null_literal);
-
 				baseindex += 4;
-				count -= 4;
+				count--;
 			}
 
 			data = ((get_base64_decoded_index(text[baseindex]) << 18) & 0x00FC0000);

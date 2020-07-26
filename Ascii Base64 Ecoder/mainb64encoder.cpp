@@ -12,10 +12,14 @@ using namespace base64;
 typedef char*	char_ptr;
 typedef char**	char_ptr2;
 
-void create_test_case_data(char_ptr2&, const char_ptr2&);
-void release_test_case_data(char_ptr2&);
+void create_encoding_test_case_data(char_ptr2&, const char_ptr2&);
+void create_decoding_test_case_data(char_ptr2&, const char_ptr2&);
+void release_encoding_test_case_data(char_ptr2&);
+void release_decoding_test_case_data(char_ptr2&);
 string read_from_file(const string);
 void write_to_file(const string, const string&);
+
+#define TEST_ENCODING_FLAG 0
 
 int main(int argc, char_ptr2 argv)
 {
@@ -30,8 +34,13 @@ int main(int argc, char_ptr2 argv)
 	}
 	source_data = argv;
 #else
-	create_test_case_data(source_data, argv);
-	argc = 3;
+	#if TEST_ENCODING_FLAG
+		create_encoding_test_case_data(source_data, argv);
+		argc = 3;
+	#else
+		create_decoding_test_case_data(source_data, argv);
+		argc = 4;
+	#endif
 #endif
 
 	b64encoder::enum_container_type source_type = b64encoder::enum_container_type::text;
@@ -113,7 +122,11 @@ int main(int argc, char_ptr2 argv)
 	std::cout << std::endl << "Press any key to end..." << std::endl;
 
 #if _DEBUG
-	release_test_case_data(source_data);
+	#if TEST_ENCODING_FLAG
+		release_encoding_test_case_data(source_data);
+	#else
+		release_decoding_test_case_data(source_data);
+	#endif
 #endif
 
 	getchar();
@@ -121,8 +134,7 @@ int main(int argc, char_ptr2 argv)
 	return 0;
 }
 
-
-void create_test_case_data(char_ptr2& data_pointer, const char_ptr2& args)
+void create_encoding_test_case_data(char_ptr2& data_pointer, const char_ptr2& args)
 {
 	data_pointer = new char*[3];
 	data_pointer[0] = args[0];
@@ -134,10 +146,36 @@ void create_test_case_data(char_ptr2& data_pointer, const char_ptr2& args)
 	memcpy_s(data_pointer[2], 29, "Data to convert for testing.", 29);
 }
 
-void release_test_case_data(char_ptr2& data_pointer)
+void create_decoding_test_case_data(char_ptr2& data_pointer, const char_ptr2& args)
+{
+	data_pointer = new char*[4];
+	data_pointer[0] = args[0];
+	data_pointer[1] = new char[3];
+	data_pointer[1][2] = NULL;
+	memcpy_s(data_pointer[1], 2, "-d", 2);
+	data_pointer[2] = new char[4];
+	data_pointer[2][3] = NULL;
+	memcpy_s(data_pointer[2], 3, "-sT", 3);
+	data_pointer[3] = new char[42];
+	data_pointer[3][41] = NULL;
+	memcpy_s(data_pointer[3], 41, "RGF0YSB0byBjb252ZXJ0IGZvciB0ZXN0aW5nLg==", 41);
+}
+
+void release_encoding_test_case_data(char_ptr2& data_pointer)
 {
 	if (data_pointer)
 	{
+		delete data_pointer[2];
+		delete data_pointer[1];
+		delete data_pointer;
+	}
+}
+
+void release_decoding_test_case_data(char_ptr2& data_pointer)
+{
+	if (data_pointer)
+	{
+		delete data_pointer[3];
 		delete data_pointer[2];
 		delete data_pointer[1];
 		delete data_pointer;
