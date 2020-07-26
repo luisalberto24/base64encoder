@@ -6,7 +6,6 @@ namespace base64
 	{
 		if (text.length() > 0)
 		{
-			size_t level = 0;
 			size_t baseindex = 0;
 			size_t cpos = 0;
 			size_t data = 0;
@@ -23,8 +22,7 @@ namespace base64
 				dest[cpos++] = base64_encoding_matrix[(UCHAR_T)((data & 0x0003F000) >> 12)];
 				dest[cpos++] = base64_encoding_matrix[(UCHAR_T)((data & 0x00000FC0) >> 6)];
 				dest[cpos++] = base64_encoding_matrix[(UCHAR_T)((data & 0x0000003F))];
-				level += 1;
-				baseindex = level * 3;
+				baseindex += 3;
 				count -= 3;
 			}
 
@@ -58,7 +56,6 @@ namespace base64
 		size_t count = text.length();
 		if (count > 0 && is_valid_base64_string(text))
 		{
-			size_t level = 0;
 			size_t baseindex = 0;
 			uint32_t data = 0;
 			std::string result((count / 4) * 3, null_literal);
@@ -75,8 +72,7 @@ namespace base64
 				result[cpos++] = ((((data & 0x0000FF00) >> 8) & 0xFF) - null_literal);
 				result[cpos++] = (((data & 0x000000FF) & 0xFF) - null_literal);
 
-				level += 1;
-				baseindex = level * 4;
+				baseindex += 4;
 				count -= 4;
 			}
 
