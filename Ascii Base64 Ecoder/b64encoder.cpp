@@ -114,14 +114,20 @@ namespace base64
 	bool b64encoder::is_valid_base64_string(std::string text)
 	{
 		size_t text_length = text.length();
-		if ((text_length % 4) == 0)
+		if (text_length > 0 && (text_length % 4) == 0)
 		{
 			size_t substract = text[text_length - 1] == equal_sign_literal ? 1 : 0;
 			if (substract > 0 && text[text_length - 2] == equal_sign_literal)
 			{
 				substract++;
 			}
+			
 			size_t length = text_length - substract;
+			if (length < 1)
+			{
+				return false;
+			}
+			
 			for (size_t i = 0; i < length - 1; i++)
 			{
 				if (!(isalpha(text[i]) || isdigit(text[i])) && text[i] != '+' && text[i] != '/')
