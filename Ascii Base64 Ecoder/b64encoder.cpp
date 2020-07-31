@@ -34,7 +34,7 @@ namespace base64
 					dest[cpos++] = base64_encoding_matrix[(UCHAR_T)((data & 0xFC) >> 2)];
 					dest[cpos++] = base64_encoding_matrix[(UCHAR_T)(data & 0x03) << 4];
 					dest[cpos++] = equal_sign_literal;
-					dest[cpos++] = equal_sign_literal;
+					dest[cpos] = equal_sign_literal;
 					break;
 				case 2:
 					data = ((text[size - count] << 8) & 0x0000FF00) | (text[(size - count) + 1] & 0x000000FF);
@@ -42,7 +42,7 @@ namespace base64
 					dest[cpos++] = base64_encoding_matrix[(UCHAR_T)((data & 0x000003F0) >> 4)];
 					data = data & 0x0000000F;
 					dest[cpos++] = data > 0 ? base64_encoding_matrix[(UCHAR_T)(data << 2)] : equal_sign_literal;
-					dest[cpos++] = equal_sign_literal;
+					dest[cpos] = equal_sign_literal;
 					break;
 			}
 
@@ -89,7 +89,7 @@ namespace base64
 			if (text[baseindex + 3] != equal_sign_literal)
 			{
 				data |= (get_base64_decoded_index(text[baseindex + 3]) & 0x0000003F);
-				result[cpos++] = (((data & 0x000000FF) & 0xFF) - null_literal);
+				result[cpos] = (((data & 0x000000FF) & 0xFF) - null_literal);
 			}
 			else pop_back++;
 
