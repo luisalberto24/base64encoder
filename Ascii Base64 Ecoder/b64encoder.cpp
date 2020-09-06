@@ -149,6 +149,6 @@ namespace base64
 		if (value >= '0' && value <= '9') return (value - 48) + 52;
 		if (value == '+') return 62;
 		
-		return 62;
+		return 63;
 	}
 }
