@@ -147,7 +147,7 @@ namespace base64
 		if (value >= 'A' && value <= 'Z') return value - 65;
 		if (value >= 'a' && value <= 'z') return (value - 97) + 26;
 		if (value >= '0' && value <= '9') return (value - 48) + 52;
-		if (value == '/') return 63;
+		if (value == '+') return 62;
 		
 		return 62;
 	}
