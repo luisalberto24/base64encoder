@@ -43,7 +43,7 @@ namespace base64
 					data =	bits_operation<0x0000FF00>::op_and(shift_bits<8>::left(text[size - 2])) | 
 							bits_operation<0x000000FF>::op_and(text[size - 1]);
 					dest[cpos++] = base64_encoding_matrix[shift_bits<0x0A>::right(bits_operation<0x0000FC00>::op_and(data))];
-					dest[cpos++] = base64_encoding_matrix[shift_bits<0x04>::right(bits_operation<0x0000FC00>::op_and(data))];
+					dest[cpos++] = base64_encoding_matrix[shift_bits<0x04>::right(bits_operation<0x000003F0>::op_and(data))];
 					data = data & 0x0000000F;
 					dest[cpos++] = data > 0 ? base64_encoding_matrix[(uint8_t)(data << 2)] : equal_sign_literal;
 					dest[cpos] = equal_sign_literal;
