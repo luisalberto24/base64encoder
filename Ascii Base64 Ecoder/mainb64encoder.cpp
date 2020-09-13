@@ -4,6 +4,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include "operate_bits.h"
 #include "b64encoder.h"
 
 using namespace std;

@@ -26,5 +26,8 @@
     <ClInclude Include="b64encoder.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="operate_bits.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

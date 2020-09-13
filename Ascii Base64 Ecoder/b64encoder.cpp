@@ -1,3 +1,4 @@
+#include "operate_bits.h"
 #include "b64encoder.h"
 
 namespace base64
@@ -15,13 +16,15 @@ namespace base64
 			std::string dest(allocate_len, null_literal);
 			while (count > 0)
 			{
-				data  = ((text[baseindex] << 16) & 0x00FF0000);
-				data |= ((text[baseindex + 1] << 8) & 0x0000FF00);
-				data |= (text[baseindex + 2] & 0x000000FF);
-				dest[cpos++] = base64_encoding_matrix[(UCHAR_T)((data & 0x00FC0000) >> 18)];
-				dest[cpos++] = base64_encoding_matrix[(UCHAR_T)((data & 0x0003F000) >> 12)];
-				dest[cpos++] = base64_encoding_matrix[(UCHAR_T)((data & 0x00000FC0) >> 6)];
-				dest[cpos++] = base64_encoding_matrix[(UCHAR_T)((data & 0x0000003F))];
+				data  = bits_operation<0x00FF0000>::op_and(shift_bits<0x10>::left(text[baseindex    ]));
+				data |= bits_operation<0x0000FF00>::op_and(shift_bits<0x08>::left(text[baseindex + 1]));
+				data |= bits_operation<0x000000FF>::op_and(text[baseindex + 2]);
+
+				dest[cpos++] = base64_encoding_matrix[shift_bits<0x12>::right(bits_operation<0x00FC0000>::op_and(data))];
+				dest[cpos++] = base64_encoding_matrix[shift_bits<0x0C>::right(bits_operation<0x0003F000>::op_and(data))];
+				dest[cpos++] = base64_encoding_matrix[shift_bits<0x06>::right(bits_operation<0x00000FC0>::op_and(data))];
+				dest[cpos++] = base64_encoding_matrix[bits_operation<0x0000003F>::op_and(data)];
+
 				baseindex += 3;
 				count--;
 			}
@@ -30,18 +33,19 @@ namespace base64
 			switch (count)
 			{
 				case 1:
-					data = text[size - count];
-					dest[cpos++] = base64_encoding_matrix[(UCHAR_T)((data & 0xFC) >> 2)];
-					dest[cpos++] = base64_encoding_matrix[(UCHAR_T)(data & 0x03) << 4];
+					data = text[size - 1];
+					dest[cpos++] = base64_encoding_matrix[shift_bits<0x02>::right(bits_operation<0xFC>::op_and(data))];
+					dest[cpos++] = base64_encoding_matrix[shift_bits<0x04>::left(bits_operation<0x03>::op_and(data))];
 					dest[cpos++] = equal_sign_literal;
 					dest[cpos] = equal_sign_literal;
 					break;
 				case 2:
-					data = ((text[size - count] << 8) & 0x0000FF00) | (text[(size - count) + 1] & 0x000000FF);
-					dest[cpos++] = base64_encoding_matrix[(UCHAR_T)((data & 0x0000FC00) >> 10)];
-					dest[cpos++] = base64_encoding_matrix[(UCHAR_T)((data & 0x000003F0) >> 4)];
+					data =	bits_operation<0x0000FF00>::op_and(shift_bits<8>::left(text[size - 2])) | 
+							bits_operation<0x000000FF>::op_and(text[size - 1]);
+					dest[cpos++] = base64_encoding_matrix[shift_bits<0x0A>::right(bits_operation<0x0000FC00>::op_and(data))];
+					dest[cpos++] = base64_encoding_matrix[shift_bits<0x04>::right(bits_operation<0x0000FC00>::op_and(data))];
 					data = data & 0x0000000F;
-					dest[cpos++] = data > 0 ? base64_encoding_matrix[(UCHAR_T)(data << 2)] : equal_sign_literal;
+					dest[cpos++] = data > 0 ? base64_encoding_matrix[(uint8_t)(data << 2)] : equal_sign_literal;
 					dest[cpos] = equal_sign_literal;
 					break;
 			}
@@ -64,32 +68,34 @@ namespace base64
 			size_t cpos = 0;
 			while (count > 1)
 			{
-				data = ((get_base64_decoded_index(text[baseindex]) << 18) & 0x00FC0000);
-				data |= ((get_base64_decoded_index(text[baseindex + 1]) << 12) & 0x0003F000);
-				data |= ((get_base64_decoded_index(text[baseindex + 2]) << 6) & 0x00000FC0);
-				data |= (get_base64_decoded_index(text[baseindex + 3]) & 0x0000003F);
-				result[cpos++] = ((((data & 0x00FF0000) >> 16) & 0xFF) - null_literal);
-				result[cpos++] = ((((data & 0x0000FF00) >> 8) & 0xFF) - null_literal);
-				result[cpos++] = (((data & 0x000000FF) & 0xFF) - null_literal);
+				data =	bits_operation<0x00FC0000>::op_and(shift_bits<0x12>::left(get_base64_decoded_index(text[baseindex	 ])));
+				data |= bits_operation<0x0003F000>::op_and(shift_bits<0x0C>::left(get_base64_decoded_index(text[baseindex + 1])));
+				data |= bits_operation<0x00000FC0>::op_and(shift_bits<0x06>::left(get_base64_decoded_index(text[baseindex + 2])));
+				data |= bits_operation<0x0000003F>::op_and(get_base64_decoded_index(text[baseindex + 3]));
+
+				result[cpos++] = shift_bits<0x10>::right(bits_operation<0x00FF0000>::op_and(data)) & 0xFF;
+				result[cpos++] = shift_bits<0x08>::right(bits_operation<0x0000FF00>::op_and(data)) & 0xFF;
+				result[cpos++] = bits_operation<0x000000FF>::op_and(data) & 0xFF;
+
 				baseindex += 4;
 				count--;
 			}
 
-			data = ((get_base64_decoded_index(text[baseindex]) << 18) & 0x00FC0000);
-			data |= ((get_base64_decoded_index(text[baseindex + 1]) << 12) & 0x0003F000);
-			result[cpos++] = ((((data & 0x00FF0000) >> 16) & 0xFF) - null_literal);
+			data =	bits_operation<0x00FC0000>::op_and(shift_bits<0x12>::left(get_base64_decoded_index(text[baseindex	 ])));
+			data |= bits_operation<0x0003F000>::op_and(shift_bits<0x0C>::left(get_base64_decoded_index(text[baseindex + 1])));
+			result[cpos++] = shift_bits<0x10>::right(bits_operation<0x00FF0000>::op_and(data)) & 0xFF;
 			size_t pop_back = 0;
 			if (text[baseindex + 2] != equal_sign_literal)
 			{
-				data |= ((get_base64_decoded_index(text[baseindex + 2]) << 6) & 0x00000FC0);
-				result[cpos++] = ((((data & 0x0000FF00) >> 8) & 0xFF) - null_literal);
+				data |= bits_operation<0x00000FC0>::op_and(shift_bits<0x06>::left(get_base64_decoded_index(text[baseindex + 2])));
+				result[cpos++] = shift_bits<0x08>::right(bits_operation<0x0000FF00>::op_and(data)) & 0xFF;
 			}
 			else pop_back++;
 
 			if (text[baseindex + 3] != equal_sign_literal)
 			{
-				data |= (get_base64_decoded_index(text[baseindex + 3]) & 0x0000003F);
-				result[cpos] = (((data & 0x000000FF) & 0xFF) - null_literal);
+				data |= bits_operation<0x0000003F>::op_and(get_base64_decoded_index(text[baseindex + 3]));
+				result[cpos] = bits_operation<0x000000FF>::op_and(data) & 0xFF;
 			}
 			else pop_back++;
 
@@ -142,7 +148,7 @@ namespace base64
 		return false;
 	}
 
-	UCHAR_T b64encoder::get_base64_decoded_index(UCHAR_T value)
+	uint8_t b64encoder::get_base64_decoded_index(uint8_t value)
 	{
 		if (value >= 'A' && value <= 'Z') return value - 65;
 		if (value >= 'a' && value <= 'z') return (value - 97) + 26;
